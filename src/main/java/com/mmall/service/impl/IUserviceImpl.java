@@ -21,6 +21,12 @@ public class IUserviceImpl implements IUserService {
     @Autowired
     private UserMapper userMapper;
 
+    /**
+     * 用户登录接口
+     * @param username
+     * @param password
+     * @return
+     */
     @Override
     public ServerResponse<User> login(String username, String password) {
         //数据库交互之后查到的结果赋给resultMap
