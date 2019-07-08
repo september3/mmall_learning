@@ -92,6 +92,7 @@ public class IProductServiceImpl implements IProductService {
         }
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
         return ServerResponse.createBySuccess(productDetailVo);
+
     }
 
     private ProductDetailVo assembleProductDetailVo(Product product){
@@ -106,6 +107,7 @@ public class IProductServiceImpl implements IProductService {
         productDetailVo.setName(product.getName());
         productDetailVo.setStatus(product.getStatus());
         productDetailVo.setStock(product.getStock());
+
         productDetailVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://img.happymmall.com/"));
 
         Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
@@ -115,8 +117,14 @@ public class IProductServiceImpl implements IProductService {
         }else {
             productDetailVo.setParentCategoryId(category.getParentId());
         }
+
         productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
         productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
+
+
+        productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
+        productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
+
         return productDetailVo;
     }
 
@@ -152,7 +160,8 @@ public class IProductServiceImpl implements IProductService {
     /**
      * 组装ProductListVo对象
      * @param product product
-     * @return
+     * @param product
+     * @return ProductListVo
      */
     private ProductListVo assembleProductListVo(Product product){
         ProductListVo productListVo = new ProductListVo();
@@ -174,6 +183,7 @@ public class IProductServiceImpl implements IProductService {
      * @param pageNum pageNum
      * @param pageSize pageSize
      * @return ServerResponse<PageInfo>
+     * @return
      */
     @Override
     public ServerResponse<PageInfo> searchProduct(String productName,
@@ -221,6 +231,7 @@ public class IProductServiceImpl implements IProductService {
      * @param orderBy orderBy
      * @return ServerResponse<PageInfo>
      */
+    @Override
     public ServerResponse<PageInfo> getProductByKeywordCatrgory(String keyword,Integer categoryId,int pageNum,int pageSize,String orderBy){
         if(StringUtils.isBlank(keyword) && categoryId == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());

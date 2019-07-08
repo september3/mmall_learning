@@ -11,6 +11,10 @@ import com.mmall.service.IProductService;
 import com.mmall.service.IUserService;
 import com.mmall.util.PropertiesUtil;
 import org.apache.commons.lang3.StringUtils;
+<<<<<<< HEAD
+=======
+import org.apache.ibatis.annotations.Param;
+>>>>>>> origin/v1.0
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
