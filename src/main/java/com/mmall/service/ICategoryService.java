@@ -18,5 +18,5 @@ public interface ICategoryService {
 
     ServerResponse<List<Category>> getChildCategory(Integer categoryId);
 
-    ServerResponse selectCategoryAndChildrenById(Integer categoryId);
+    ServerResponse<List<Integer>> selectCategoryAndChildrenById(Integer categoryId);
 }

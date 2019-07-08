@@ -3,12 +3,14 @@ package com.mmall.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
 import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.ProductMapper;
 import com.mmall.pojo.Category;
 import com.mmall.pojo.Product;
+import com.mmall.service.ICategoryService;
 import com.mmall.service.IProductService;
 import com.mmall.util.DateTimeUtil;
 import com.mmall.util.PropertiesUtil;
@@ -34,6 +36,9 @@ public class IProductServiceImpl implements IProductService {
 
     @Resource
     private CategoryMapper categoryMapper;
+
+    @Resource
+    private ICategoryService iCategoryService;
 
     @Override
     public ServerResponse saveOrUpdateProduct(Product product){
@@ -87,8 +92,6 @@ public class IProductServiceImpl implements IProductService {
         }
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
         return ServerResponse.createBySuccess(productDetailVo);
-
-
     }
 
     private ProductDetailVo assembleProductDetailVo(Product product){
@@ -103,7 +106,6 @@ public class IProductServiceImpl implements IProductService {
         productDetailVo.setName(product.getName());
         productDetailVo.setStatus(product.getStatus());
         productDetailVo.setStock(product.getStock());
-
         productDetailVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://img.happymmall.com/"));
 
         Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
@@ -113,10 +115,8 @@ public class IProductServiceImpl implements IProductService {
         }else {
             productDetailVo.setParentCategoryId(category.getParentId());
         }
-
         productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
         productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
-
         return productDetailVo;
     }
 
@@ -151,7 +151,7 @@ public class IProductServiceImpl implements IProductService {
 
     /**
      * 组装ProductListVo对象
-     * @param product
+     * @param product product
      * @return
      */
     private ProductListVo assembleProductListVo(Product product){
@@ -173,7 +173,7 @@ public class IProductServiceImpl implements IProductService {
      * @param productId productId
      * @param pageNum pageNum
      * @param pageSize pageSize
-     * @return
+     * @return ServerResponse<PageInfo>
      */
     @Override
     public ServerResponse<PageInfo> searchProduct(String productName,
@@ -193,7 +193,74 @@ public class IProductServiceImpl implements IProductService {
             PageInfo pageRsesult = new PageInfo(productList);
             pageRsesult.setList(productListVoList);
             return ServerResponse.createBySuccess(pageRsesult);
+    }
 
+
+    @Override
+    public ServerResponse<ProductDetailVo> getProductDetail(Integer productId){
+        if(productId == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if(product == null){
+            return ServerResponse.createBySuccessMessage("产品已下架或者删除");
+        }
+        if(product.getStatus() != Const.ProductStatusEnum.ON_SALE.getCode()){
+            return ServerResponse.createByErrorMessage("产品已下架或删除");
+        }
+        ProductDetailVo productDetailVo = assembleProductDetailVo(product);
+        return ServerResponse.createBySuccess(productDetailVo);
+    }
+
+    /**
+     * 根据keyword和categoryId进行搜索
+     * @param keyword keyword
+     * @param categoryId categoryId
+     * @param pageNum pageNum
+     * @param pageSize pageSize
+     * @param orderBy orderBy
+     * @return ServerResponse<PageInfo>
+     */
+    public ServerResponse<PageInfo> getProductByKeywordCatrgory(String keyword,Integer categoryId,int pageNum,int pageSize,String orderBy){
+        if(StringUtils.isBlank(keyword) && categoryId == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+
+        List<Integer> categoryIdList = Lists.newArrayList();
+        if(categoryId != null){
+            Category category = categoryMapper.selectByPrimaryKey(categoryId);
+            //没有该分类，并且没有关键字，这个时候返回一个空集合
+            if(category == null && StringUtils.isBlank(keyword)){
+                PageHelper.startPage(pageNum, pageSize);
+                List<ProductDetailVo> productDetailVoList = Lists.newArrayList();
+                PageInfo pageInfo = new PageInfo(productDetailVoList);
+                return ServerResponse.createBySuccess(pageInfo);
+            }
+            //赋值
+            categoryIdList = iCategoryService.selectCategoryAndChildrenById(category.getId()).getData();
+        }
+        if(StringUtils.isNotBlank(keyword)){
+            keyword = new StringBuilder().append("%").append(keyword).append("%").toString();
+        }
+        PageHelper.startPage(pageNum,pageSize);
+        if(StringUtils.isNotBlank(orderBy)){
+            //排序处理
+            if(Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)){
+                String[] orderByArray = orderBy.split("_");
+                //重新拼接OrderBy
+                PageHelper.orderBy(orderByArray[0] + " " + orderByArray[1]);
+            }
+        }
+        List<Product> productList = productMapper.selectByNameAndProductId(StringUtils.isBlank(keyword)?null:keyword,
+                categoryIdList.size()==0?null:categoryId);
+        List<ProductListVo> productDetailVoList = Lists.newArrayList();
+        for (Product product : productList){
+            ProductListVo productDetailVo = assembleProductListVo(product);
+            productDetailVoList.add(productDetailVo);
+        }
+        PageInfo pageInfo = new PageInfo(productList);
+        pageInfo.setList(productDetailVoList);
+        return ServerResponse.createBySuccess(pageInfo);
     }
 
 }

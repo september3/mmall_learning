@@ -22,15 +22,16 @@ import java.util.Set;
  * Date 2019/2/28 20:50
  * Description
  */
-//@Slf4j
+
 @Service("iCategoryService")
 public class ICategoryServiceImpl implements ICategoryService {
 
     private static final Logger log = LoggerFactory.getLogger(ICategoryServiceImpl.class);
 
-    @Autowired
+    @Resource
     CategoryMapper categoryMapper;
 
+    @Override
     public ServerResponse addCategory(String categoryName,Integer parentId){
         if(parentId == null || StringUtils.isBlank(categoryName)){
             return ServerResponse.createByErrorMessage("添加品类参数错误");
@@ -38,7 +39,8 @@ public class ICategoryServiceImpl implements ICategoryService {
         Category category = new Category();
         category.setName(categoryName);
         category.setParentId(parentId);
-        category.setStatus(true); //这个分类是可用的
+        //这个分类是可用的
+        category.setStatus(true);
 
         int rowCount = categoryMapper.insert(category);
         //判断插入数据库是否成功
@@ -48,6 +50,7 @@ public class ICategoryServiceImpl implements ICategoryService {
         return ServerResponse.createByErrorMessage("添加品类失败");
     }
 
+    @Override
     public ServerResponse updateCategory(Integer categoryId,String categoryName){
         if(categoryId == null || StringUtils.isBlank(categoryName)){
             return ServerResponse.createByErrorMessage("更新品类参数错误");
@@ -66,34 +69,41 @@ public class ICategoryServiceImpl implements ICategoryService {
         return ServerResponse.createByErrorMessage("更新品类名字失败");
     }
 
+    @Override
     public ServerResponse<List<Category>> getChildCategory(Integer categoryId){
         List<Category> categoryList = categoryMapper.selectCategoryChildrenByParentId(categoryId);
         if(CollectionUtils.isEmpty(categoryList)){
             log.info("未找到当前分类的子目录");
-//            return ServerResponse.createByErrorMessage("未找到当前分类的子目录");
+            return ServerResponse.createByErrorMessage("未找到当前分类的子目录");
         }
         return ServerResponse.createBySuccess(categoryList);
     }
 
     /**
      * 递归查询本节点的id及孩子节点的id
-     * @param categoryId
-     * @return
+     * @param categoryId categoryId
+     * @return ServerResponse<List<Integer>>
      */
-    public ServerResponse selectCategoryAndChildrenById(Integer categoryId){
+    @Override
+    public ServerResponse<List<Integer>> selectCategoryAndChildrenById(Integer categoryId){
         Set<Category> categorySet = Sets.newHashSet();
         findChildCategory(categorySet,categoryId);
 
-        List<Category> catagoryIdList  = Lists.newArrayList();
-        if(catagoryIdList != null){
-            for (Category categoryItem : catagoryIdList){
-                catagoryIdList.add(categoryItem);
+        List<Integer> catagoryIdList  = Lists.newArrayList();
+        if(categoryId != null){
+            for (Category categoryItem : categorySet){
+                catagoryIdList.add(categoryItem.getId());
             }
         }
         return ServerResponse.createBySuccess(catagoryIdList);
     }
 
-    //递归算法，算出子节点
+    /**
+     * 递归算法，算出子节点
+     * @param categorySet categorySet
+     * @param categoryId categoryId
+     * @return Set<Category>
+     */
     private Set<Category> findChildCategory(Set<Category> categorySet,Integer categoryId){
         Category category = categoryMapper.selectByPrimaryKey(categoryId);
         if(category != null){
