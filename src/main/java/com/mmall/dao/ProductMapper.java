@@ -31,9 +31,8 @@ public interface ProductMapper {
      * @return
      */
     List<Product> selectByNameAndProductId(@Param("productName")String productName,@Param("productId")Integer productId);
-<<<<<<< HEAD
+
 
     List<Product> selectByNameAndCategoryIds(@Param("name") String name,@Param("categoryIdList") List<Integer> categoryIdList);
-=======
->>>>>>> origin/v1.0
+
 }
