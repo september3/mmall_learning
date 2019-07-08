@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mmall.dao.TestDynamicSqlMapper">
+    <resultMap id="BaseResultMap" type="com.mmall.pojo.Dynamic" >
+        <constructor >
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="product_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="quantity" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="checked" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+        </constructor>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+      id ,user_id,product_id,quantity,checked,create_time,update_time
+    </sql>
+      <!-- id：唯一标识符；parameterType-->
+    <delete id="deleteByPrimaryKey" parameterType="com.mmall.dao.TestDynamicSqlMapper" >
+        delete
+        <include refid="Base_Column_List"/>
+        from mmall_cart
+        where id=#{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.mmall.dao.TestDynamicSqlMapper" >
+        insert into mmall_cart( id ,user_id,product_id,quantity,checked,create_time,update_time)
+      values (#{record.id},#{record.user_id},#{record.product_id})
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.mmall.dao.TestDynamicSqlMapper" >
+        insert into mmall_cart
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id=#{id}
+            </if>
+        </trim>
+    </insert>
+
+
+</mapper>

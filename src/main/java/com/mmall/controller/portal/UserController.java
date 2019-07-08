@@ -17,8 +17,9 @@ import javax.servlet.http.HttpSession;
  * Created by sunlele
  * Date 2019/1/17 1:32
  * Description  前端接口   用户相关接口统一使用Post接口
+ * @author Administrator
  */
-@Controller          //spring注解
+@Controller
 @RequestMapping("/user/")
 public class UserController {
 
@@ -27,10 +28,10 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param username
-     * @param password
-     * @param session
-     * @return
+     * @param username username
+     * @param password password
+     * @param session session
+     * @return ServerResponse<User>
      */
     @RequestMapping(value = "login.do",method = RequestMethod.POST)
     @ResponseBody  //将返回值序列化成json格式
@@ -45,8 +46,8 @@ public class UserController {
 
     /**
      * 退出登录
-     * @param session
-     * @return
+     * @param session session
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "logout.do",method = RequestMethod.POST)
     @ResponseBody
@@ -57,8 +58,8 @@ public class UserController {
 
     /**
      * 注册
-     * @param user
-     * @return
+     * @param user user
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "register.do",method = RequestMethod.POST)
     @ResponseBody
@@ -68,9 +69,9 @@ public class UserController {
 
     /**
      * 安全校验
-     * @param str
-     * @param type
-     * @return
+     * @param str str
+     * @param type type
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "check_valid.do",method = RequestMethod.POST)
     @ResponseBody
@@ -81,8 +82,8 @@ public class UserController {
 
     /**
      * 获取当前用户信息
-     * @param session
-     * @return
+     * @param session session
+     * @return ServerResponse<User>
      */
     @RequestMapping(value = "get_user_info.do",method = RequestMethod.POST)
     @ResponseBody
@@ -98,8 +99,8 @@ public class UserController {
 
     /**
      *忘记密码
-     * @param username
-     * @return
+     * @param username username
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "forget_get_question.do",method = RequestMethod.POST)
     @ResponseBody
@@ -109,10 +110,10 @@ public class UserController {
 
     /**
      * 使用本地缓存进行答案校验
-     * @param username
-     * @param question
-     * @param answer
-     * @return
+     * @param username username
+     * @param question question
+     * @param answer answer
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "forget_check_answer.do",method = RequestMethod.POST)
     @ResponseBody
@@ -122,10 +123,10 @@ public class UserController {
 
     /**
      * 重置密码
-     * @param username
-     * @param passwordNew
-     * @param forgetToken
-     * @return
+     * @param username username
+     * @param passwordNew passwordnew
+     * @param forgetToken forgetToken
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "forget_reset_password.do",method = RequestMethod.POST)
     @ResponseBody
@@ -135,14 +136,14 @@ public class UserController {
 
     /**
      *登录状态下的重置密码
-     * @param session
-     * @param passwordOld
-     * @param passwordNew
-     * @return
+     * @param session session
+     * @param passwordOld passwordOld
+     * @param passwordNew passewordNew
+     * @return ServerResponse<String>
      */
     @RequestMapping(value = "reset_password.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<String> reset_password(HttpSession session,String passwordOld,String passwordNew){
+    public ServerResponse<String> resetPassword(HttpSession session,String passwordOld,String passwordNew){
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         if(user == null){
             return ServerResponse.createByErrorMessage("用户未登录");
@@ -152,13 +153,13 @@ public class UserController {
 
     /**
      * 更新个人信息
-     * @param session
-     * @param user
-     * @return
+     * @param session session
+     * @param user user
+     * @return ServerResponse<User>
      */
     @RequestMapping(value = "update_information.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> update_information(HttpSession session,User user){
+    public ServerResponse<User> updateInformation(HttpSession session,User user){
         User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
         if(currentUser == null){
             return ServerResponse.createByErrorMessage("用户未登录");
@@ -174,12 +175,12 @@ public class UserController {
 
     /**
      * 获取当前用户的登录信息
-     * @param session
-     * @return
+     * @param session session
+     * @return ServerResponse<User>
      */
     @RequestMapping(value = "get_information.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> get_information(HttpSession session){
+    public ServerResponse<User> getInformation(HttpSession session){
         User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
         if(currentUser == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"未登录需要强制登录");
